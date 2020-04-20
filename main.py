@@ -3,37 +3,63 @@ import trader as trader
 import math 
 from datetime import datetime
 from pprint import pprint
+import time
 
 shares = []
-
 cash = 1000
 companies_to_invest = 10
 money_for_each_company = cash / companies_to_invest
 
-for index, share in yf.top10().iterrows():
+def buy(share):
+    global cash
     number_of_shares = math.floor(money_for_each_company / share.price)
     transaction_total = number_of_shares * share.price
     cash -= transaction_total
-    shares.append({
-        'symbol': share.symbol,
-        'datetime': datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-        'transaction_total': transaction_total,
-        'amount': number_of_shares,
-        'price': share.price
-    })
+    if(transaction_total > 0):
+        print("Buying " + str(number_of_shares) + " shares of " + share.symbol)
+        shares.append({
+            'symbol': share.symbol,
+            'datetime': datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+            'transaction_total': transaction_total,
+            'amount': number_of_shares,
+            'price': share.price
+        })
 
 def present_value():
     return trader.present_value(shares) + cash
 
 def sell(share, current_value):
-    global cash, shares
+    global cash
     print(f"Selling {share} for {current_value} each")
     shares.remove(share)
     cash += current_value * share["amount"]
 
-for share in shares:
-    print(shares)
-    current_value = yf.quote(share["symbol"])
-    sell(share, current_value)
+def sell_shares_with_capital_gain():
+    for share in shares[:]:
+        current_value = yf.quote(share["symbol"])
+        if (current_value > share["price"]):
+            sell(share, current_value)
 
-print(cash)
+def update_money_for_each_company():
+    global money_for_each_company
+    money_for_each_company = cash / companies_to_invest
+
+def invest_in_top_10():
+    for _ , share in yf.top10().iterrows():
+        buy(share)
+
+def main():
+    # Start investing in the top 10 gainers
+    invest_in_top_10()
+
+    while True:
+        update_money_for_each_company()
+        sell_shares_with_capital_gain()
+        invest_in_top_10()
+        pprint(shares)
+        print(f"{len(shares)} Shares")
+        print(f"Total Cash: {cash}")
+        time.sleep(5*60)
+
+            
+main()
