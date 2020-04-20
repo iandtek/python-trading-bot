@@ -58,7 +58,9 @@ def main():
         invest_in_top_10()
         pprint(shares)
         print(f"{len(shares)} Shares")
-        print(f"Total Cash: {cash}")
+        pv = present_value()
+        total = pv + cash
+        print(f"Total Cash: {cash} - Portfolio Value: {pv} - Total: {total}")
         time.sleep(5*60)
 
             
