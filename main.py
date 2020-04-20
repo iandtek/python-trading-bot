@@ -60,7 +60,8 @@ def main():
         print(f"{len(shares)} Shares")
         pv = present_value()
         total = pv + cash
-        print(f"Total Cash: {cash} - Portfolio Value: {pv} - Total: {total}")
+        now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        print(f"Total Cash: {cash} - Portfolio Value: {pv} - Total: {total} - As of {now}")
         time.sleep(5*60)
 
             
